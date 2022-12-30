@@ -7,8 +7,8 @@ import csv
 import os
 from collections import defaultdict
 
-app = Flask(__name__)
-cors = CORS(app)
+application = Flask(__name__)
+cors = CORS(application)
 
 try:
     _create_unverified_https_context = ssl._create_unverified_context
@@ -29,18 +29,18 @@ reviews = pymongo.collection.Collection(db, 'reviews')
 admins = pymongo.collection.Collection(db, 'admins')
 trackers = pymongo.collection.Collection(db, 'trackers')
 
-@app.route('/add_applicant', methods = ['POST'])
+@application.route('/add_applicant', methods = ['POST'])
 def addApplicant():
     application = json.loads(request.get_data(as_text = True))
     db.applicants.insert_one(application)
     return jsonify(message = 'SUCCESS')
 
-@app.route('/get_applicant/<grader>', methods = ['GET'])
+@application.route('/get_applicant/<grader>', methods = ['GET'])
 def getApplicants(grader):
     documents = list(db.applicants.find({"$and" : [{ 'assigned_to': grader }, { 'graded_by': {'$ne': grader}}]}))
     return json.dumps(documents, default=str)
 
-@app.route('/add_review', methods = ['POST'])
+@application.route('/add_review', methods = ['POST'])
 def addReview():
     review = json.loads(request.get_data(as_text = True))
     applicant = list(db.applicants.find({ "time_created" : review['applicantID'] }))[0]
@@ -49,7 +49,7 @@ def addReview():
     db.reviews.insert_one(review)
     return jsonify(message = 'SUCCESS')
 
-@app.route('/check_grader', methods = ['POST'])
+@application.route('/check_grader', methods = ['POST'])
 def checkGrader():
     grader = json.loads(request.get_data(as_text = True))
     target = grader['email']
@@ -59,13 +59,13 @@ def checkGrader():
         result = True
     return json.dumps({"found": result}, default=str)
 
-@app.route('/add_admin', methods = ['POST'])
+@application.route('/add_admin', methods = ['POST'])
 def addAdmin():
     admin = json.loads(request.get_data(as_text = True))
     db.admins.insert_one(admin)
     return jsonify(message = 'SUCCESS')
 
-@app.route('/check_admin', methods = ['POST'])
+@application.route('/check_admin', methods = ['POST'])
 def checkAdmin():
     admin = json.loads(request.get_data(as_text = True))
     target = admin['email']
@@ -75,25 +75,25 @@ def checkAdmin():
         result = True
     return json.dumps({"found": result}, default=str)
 
-@app.route('/get_graders', methods = ['GET'])
+@application.route('/get_graders', methods = ['GET'])
 def getGraders():
     graders = list(db.graders.find())
     return json.dumps(graders, default=str)
 
-@app.route('/add_grader', methods = ['POST'])
+@application.route('/add_grader', methods = ['POST'])
 def addGrader():
     grader = json.loads(request.get_data(as_text = True))
     db.graders.insert_one(grader)
     return jsonify(message = 'SUCCESS')
 
-@app.route('/remove_grader', methods = ['POST'])
+@application.route('/remove_grader', methods = ['POST'])
 def removeGrader():
     grader = json.loads(request.get_data(as_text = True))
     target = grader['email']
     db.graders.delete_one({'email': target})
     return jsonify(message = 'SUCCESS')
 
-@app.route('/analytics', methods = ['GET'])
+@application.route('/analytics', methods = ['GET'])
 def getAnalytics():
     # Applicant count, Distribution by: year, major, gender
     applicants = list(db.applicants.find())
@@ -133,7 +133,7 @@ def getAnalytics():
 
     return json.dumps(result, default=str)
 
-@app.route('/assign_graders', methods = ['GET'])
+@application.route('/assign_graders', methods = ['GET'])
 def assignGraders():
     graders = list(db.graders.find())
     applicants = list(db.applicants.find({'assigned_to': []}))
@@ -161,7 +161,7 @@ def assignGraders():
 
     return json.dumps(assignments)
 
-@app.route('/export_results', methods = ['GET'])
+@application.route('/export_results', methods = ['GET'])
 def exportResults():
     reviews = list(db.reviews.find())
     data = []
@@ -184,5 +184,5 @@ def exportResults():
     return json.dumps(data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    application.run(debug=True)
 
