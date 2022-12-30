@@ -102,23 +102,22 @@ def getAnalytics():
     male, female, other = 0, 0, 0
     for app in applicants:
         year = app['year']
-        match year:
-            case "2023":
-                senior += 1
-            case "2024":
-                junior += 1
-            case "2025":
-                sophomore += 1
-            case "2026":
-                freshmen += 1
+        if year == "2023":
+            senior += 1
+        elif year == "2024":
+            junior += 1
+        elif year == "2025":
+            sophomore += 1
+        elif year == "2026":
+            freshmen += 1
+            
         gender = app['gender']
-        match gender: 
-            case "Male":
-                male += 1
-            case "Female":
-                female += 1
-            case _:
-                other += 1
+        if gender == "Male":
+            male += 1
+        elif gender == "Female":
+            female += 1
+        else:
+            other += 1
 
     result = {
         'count': count,
