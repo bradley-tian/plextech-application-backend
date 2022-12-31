@@ -110,7 +110,7 @@ def getAnalytics():
             sophomore += 1
         elif year == "2026":
             freshmen += 1
-            
+
         gender = app['gender']
         if gender == "Male":
             male += 1
@@ -141,6 +141,9 @@ def assignGraders():
     current = int(tracker['current'])
     scope = len(graders)
 
+    if current >= scope: 
+        current = current % scope
+
     for app in applicants:
         app['assigned_to'].append(graders[current]['email'])
         app['assigned_to'].append(graders[(current + 1) % scope]['email'])
@@ -164,6 +167,10 @@ def assignGraders():
 def exportResults():
     reviews = list(db.reviews.find())
     data = []
+    
+    if len(reviews) == 0:
+        return json.dumps([])
+
     with open("results.csv", "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=reviews[0].keys())
         writer.writeheader()
