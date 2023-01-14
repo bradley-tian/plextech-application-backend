@@ -189,6 +189,11 @@ def exportResults():
         
     return json.dumps(data)
 
+@application.route('/flush_database', methods = ['GET'])
+def flushDatabase():
+    db.applicants.remove({})
+    return jsonify(message = 'SUCCESS')
+
 if __name__ == '__main__':
     application.run(debug=True)
 
