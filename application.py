@@ -150,7 +150,7 @@ def assignGraders():
         db.applicants.replace_one({ "time_created": app['time_created'] }, app)
         current = (current + 1) % scope
     
-    db.trackers.replace_one({'name': 'index' }, {'current': current})
+    db.trackers.replace_one({'name': 'index'}, {'current': current})
 
     applicants = list(db.applicants.find())
 
