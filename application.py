@@ -28,6 +28,7 @@ graders = pymongo.collection.Collection(db, 'graders')
 reviews = pymongo.collection.Collection(db, 'reviews')
 admins = pymongo.collection.Collection(db, 'admins')
 trackers = pymongo.collection.Collection(db, 'trackers')
+errors = pymongo.collection.Collection(db, 'errors')
 
 @application.route('/add_applicant', methods = ['POST'])
 def addApplicant():
@@ -193,6 +194,12 @@ def exportResults():
 def flushDatabase():
     db.applicants.delete_many({})
     db.reviews.delete_many({})
+    return jsonify(message = 'SUCCESS')
+
+@application.route('/report_error', methods = ['POST'])
+def reportError():
+    report = json.loads(request.get_data(as_text = True))
+    db.errors.insert_one(report)
     return jsonify(message = 'SUCCESS')
 
 if __name__ == '__main__':
