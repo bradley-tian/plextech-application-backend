@@ -121,19 +121,21 @@ def getAnalytics():
         else:
             other += 1
 
-        race = app['race']
-        if race == 'American Indian or Alaska Native':
-            american_indian += 1
-        elif race == "Asian (including Indian subcontinent and Philippines origin)":
-            asian += 1
-        elif race == 'Black or African American':
-            black += 1
-        elif race == 'White':
-            white += 1
-        elif race == 'Middle Eastern':
-            middle_eastern += 1
-        elif race == "Native American or Other Pacific Islander":
-            pacific_islander += 1
+        if 'race' in app:
+            race = app['race']
+            if race == 'American Indian or Alaska Native':
+                american_indian += 1
+            elif race == "Asian (including Indian subcontinent and Philippines origin)":
+                asian += 1
+            elif race == 'Black or African American':
+                black += 1
+            elif race == 'White':
+                white += 1
+            elif race == 'Middle Eastern':
+                middle_eastern += 1
+            elif race == "Native American or Other Pacific Islander":
+                pacific_islander += 1
+        
 
     result = {
         'count': count,
