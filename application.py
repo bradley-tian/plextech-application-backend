@@ -100,6 +100,8 @@ def getAnalytics():
     count = len(applicants)
     freshmen, sophomore, junior, senior = 0, 0, 0, 0
     male, female, other = 0, 0, 0
+    american_indian, asian, black, white, middle_eastern, pacific_islander = 0, 0, 0, 0, 0, 0
+
     for app in applicants:
         year = app['year']
         if year == "2023":
@@ -119,6 +121,20 @@ def getAnalytics():
         else:
             other += 1
 
+        race = app['race']
+        if race == 'American Indian or Alaska Native':
+            american_indian += 1
+        elif race == "Asian (including Indian subcontinent and Philippines origin)":
+            asian += 1
+        elif race == 'Black or African American':
+            black += 1
+        elif race == 'White':
+            white += 1
+        elif race == 'Middle Eastern':
+            middle_eastern += 1
+        elif race == "Native American or Other Pacific Islander":
+            pacific_islander += 1
+
     result = {
         'count': count,
         'freshmen': freshmen,
@@ -128,6 +144,12 @@ def getAnalytics():
         'male': male,
         'female': female,
         'other': other,
+        'American Indian': american_indian,
+        "Asian": asian,
+        "Black": black,
+        "White": white,
+        "Middle Eastern": middle_eastern,
+        "Pacific Islander": pacific_islander,
     }
 
     return json.dumps(result, default=str)
