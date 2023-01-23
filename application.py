@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_pymongo import pymongo
-from flask_mail import Mail
 import json
 import ssl
 import csv
@@ -97,7 +96,6 @@ def removeGrader():
 
 @application.route('/analytics', methods = ['GET'])
 def getAnalytics():
-    # Applicant count, Distribution by: year, major, gender
     applicants = list(db.applicants.find())
     count = len(applicants)
     freshmen, sophomore, junior, senior = 0, 0, 0, 0
