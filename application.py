@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_pymongo import pymongo
+from flask_mail import Mail
 import json
 import ssl
 import csv
@@ -185,6 +186,33 @@ def exportResults():
     
     try:
         os.remove('results.csv')
+    except:
+        print("ERROR: CSV FILE NOT FOUND")
+        
+    return json.dumps(data)
+
+@application.route('/export_applications', methods = ['GET'])
+def exportApplications():
+
+    applications = list(db.applicants.find())
+    data = []
+
+    if len(applications) == 0:
+        return json.dumps([])
+
+    with open("applications.csv", "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=applications[0].keys())
+        writer.writeheader()
+        for app in applications:
+            writer.writerow(app)
+
+    with open("applications.csv", "r", newline="") as f:
+        reader = csv.DictReader(f, fieldnames=applications[0].keys())
+        data = list(reader)
+        f.close()
+    
+    try:
+        os.remove('applications.csv')
     except:
         print("ERROR: CSV FILE NOT FOUND")
         
