@@ -144,12 +144,12 @@ def getAnalytics():
         'male': male,
         'female': female,
         'other': other,
-        'American Indian': american_indian,
+        'American_Indian': american_indian,
         "Asian": asian,
         "Black": black,
         "White": white,
-        "Middle Eastern": middle_eastern,
-        "Pacific Islander": pacific_islander,
+        "Middle_Eastern": middle_eastern,
+        "Pacific_Islander": pacific_islander,
     }
 
     return json.dumps(result, default=str)
