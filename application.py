@@ -201,13 +201,13 @@ def exportApplications():
         return json.dumps([])
 
     with open("applications.csv", "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=applications[-1].keys())
+        writer = csv.DictWriter(f, fieldnames=applications[11].keys())
         writer.writeheader()
         for app in applications:
             writer.writerow(app)
 
     with open("applications.csv", "r", newline="") as f:
-        reader = csv.DictReader(f, fieldnames=applications[-1].keys())
+        reader = csv.DictReader(f, fieldnames=applications[11].keys())
         data = list(reader)
         f.close()
     
