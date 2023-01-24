@@ -6,6 +6,8 @@ import ssl
 import csv
 import os
 from collections import defaultdict
+import numpy as np
+from scipy import stats
 
 application = Flask(__name__)
 cors = CORS(application)
@@ -244,8 +246,13 @@ def exportApplications():
 
 @application.route('/flush_database', methods = ['GET'])
 def flushDatabase():
-    db.applicants.delete_many({})
     db.reviews.delete_many({})
+
+    applicants = list(db.applicants.find())
+    for applicant in applicants:
+        applicant['graded_by'] = []
+        applicant['assigned_to'] = []
+        db.applicants.replace_one({ "time_created" : applicant['time_created'] }, applicant)
     return jsonify(message = 'SUCCESS')
 
 @application.route('/report_error', methods = ['POST'])
@@ -253,6 +260,80 @@ def reportError():
     report = json.loads(request.get_data(as_text = True))
     db.errors.insert_one(report)
     return jsonify(message = 'SUCCESS')
+
+@application.route('/evaluate_results', methods = ['GET'])
+def evaluateResults():
+    reviews = list(db.reviews.find())
+    judgments = defaultdict(lambda: defaultdict(list))
+
+    for review in reviews:
+        judgments[review['grader']]['rating0'].append((int(review['rating0']), review['applicantID']))
+        judgments[review['grader']]['rating1'].append((int(review['rating1']), review['applicantID']))
+        judgments[review['grader']]['rating2'].append((int(review['rating2']), review['applicantID']))
+        judgments[review['grader']]['rating3'].append((int(review['rating3']), review['applicantID']))
+        judgments[review['grader']]['rating4'].append((int(review['rating4']), review['applicantID']))
+
+    for grader in judgments:
+        z_0 = stats.zscore(grader['rating0'])
+        z_1 = stats.zscore(grader['rating1'])
+        z_2 = stats.zscore(grader['rating2'])
+        z_3 = stats.zscore(grader['rating3'])
+        z_4 = stats.zscore(grader['rating4'])
+
+        for i in range(len(z_0)):
+            grader['rating0'][i] = (z_0[i], grader['rating0'][i][1])
+            grader['rating1'][i] = (z_1[i], grader['rating1'][i][1])
+            grader['rating2'][i] = (z_2[i], grader['rating2'][i][1])
+            grader['rating3'][i] = (z_3[i], grader['rating3'][i][1])
+            grader['rating4'][i] = (z_4[i], grader['rating4'][i][1])
+
+    evaluations = defaultdict(lambda: defaultdict(list))
+
+    for grader in judgments:
+        for i in range(len(grader['rating0'])):
+            evaluations[grader['rating0'][1]]['rating0'].append(grader['rating0'][0])
+            evaluations[grader['rating1'][1]]['rating1'].append(grader['rating1'][0])
+            evaluations[grader['rating2'][1]]['rating2'].append(grader['rating2'][0])
+            evaluations[grader['rating3'][1]]['rating3'].append(grader['rating3'][0])
+            evaluations[grader['rating4'][1]]['rating4'].append(grader['rating4'][0])
+
+    for eval in evaluations:
+        eval['rating0'] = np.mean(eval['rating0'])
+        eval['rating1'] = np.mean(eval['rating1'])
+        eval['rating2'] = np.mean(eval['rating2'])
+        eval['rating3'] = np.mean(eval['rating3'])
+        eval['rating4'] = np.mean(eval['rating4'])
+
+    data = []
+
+    for applicant in evaluations.keys():
+        eval = evaluations[applicant]
+        eval['applicantID'] = applicant
+        data.append(eval)
+
+    export = []
+
+    if len(data) == 0:
+        return json.dumps([])
+
+    with open("evaluations.csv", "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=data[0].keys())
+        writer.writeheader()
+        for applicant in data:
+            writer.writerow(applicant)
+
+    with open("evaluations.csv", "r", newline="") as f:
+        reader = csv.DictReader(f, fieldnames=data[0].keys())
+        export = list(reader)
+        f.close()
+    
+    try:
+        os.remove('evaluations.csv')
+    except:
+        print("ERROR: CSV FILE NOT FOUND")
+        
+    return json.dumps(export)
+
 
 if __name__ == '__main__':
     application.run(debug=True)
