@@ -274,35 +274,35 @@ def evaluateResults():
         judgments[review['grader']]['rating4'].append((int(review['rating4']), review['applicantID']))
 
     for grader in judgments:
-        z_0 = stats.zscore([x[0] for x in grader['rating0']])
-        z_1 = stats.zscore([x[0] for x in grader['rating1']])
-        z_2 = stats.zscore([x[0] for x in grader['rating2']])
-        z_3 = stats.zscore([x[0] for x in grader['rating3']])
-        z_4 = stats.zscore([x[0] for x in grader['rating4']])
+        z_0 = stats.zscore([x[0] for x in judgments[grader]['rating0']])
+        z_1 = stats.zscore([x[0] for x in judgments[grader]['rating1']])
+        z_2 = stats.zscore([x[0] for x in judgments[grader]['rating2']])
+        z_3 = stats.zscore([x[0] for x in judgments[grader]['rating3']])
+        z_4 = stats.zscore([x[0] for x in judgments[grader]['rating4']])
 
         for i in range(len(z_0)):
-            grader['rating0'][i] = (z_0[i], grader['rating0'][i][1])
-            grader['rating1'][i] = (z_1[i], grader['rating1'][i][1])
-            grader['rating2'][i] = (z_2[i], grader['rating2'][i][1])
-            grader['rating3'][i] = (z_3[i], grader['rating3'][i][1])
-            grader['rating4'][i] = (z_4[i], grader['rating4'][i][1])
+            judgments[grader]['rating0'][i] = (z_0[i], judgments[grader]['rating0'][i][1])
+            judgments[grader]['rating1'][i] = (z_1[i], judgments[grader]['rating1'][i][1])
+            judgments[grader]['rating2'][i] = (z_2[i], judgments[grader]['rating2'][i][1])
+            judgments[grader]['rating3'][i] = (z_3[i], judgments[grader]['rating3'][i][1])
+            judgments[grader]['rating4'][i] = (z_4[i], judgments[grader]['rating4'][i][1])
 
     evaluations = defaultdict(lambda: defaultdict(list))
 
     for grader in judgments:
-        for i in range(len(grader['rating0'])):
-            evaluations[grader['rating0'][1]]['rating0'].append(grader['rating0'][0])
-            evaluations[grader['rating1'][1]]['rating1'].append(grader['rating1'][0])
-            evaluations[grader['rating2'][1]]['rating2'].append(grader['rating2'][0])
-            evaluations[grader['rating3'][1]]['rating3'].append(grader['rating3'][0])
-            evaluations[grader['rating4'][1]]['rating4'].append(grader['rating4'][0])
+        for i in range(len(judgments[grader]['rating0'])):
+            evaluations[judgments[grader]['rating0'][i][1]]['rating0'].append(judgments[grader]['rating0'][i][0])
+            evaluations[judgments[grader]['rating1'][i][1]]['rating1'].append(judgments[grader]['rating1'][i][0])
+            evaluations[judgments[grader]['rating2'][i][1]]['rating2'].append(judgments[grader]['rating2'][i][0])
+            evaluations[judgments[grader]['rating3'][i][1]]['rating3'].append(judgments[grader]['rating3'][i][0])
+            evaluations[judgments[grader]['rating4'][i][1]]['rating4'].append(judgments[grader]['rating4'][i][0])
 
     for eval in evaluations:
-        eval['rating0'] = np.mean(eval['rating0'])
-        eval['rating1'] = np.mean(eval['rating1'])
-        eval['rating2'] = np.mean(eval['rating2'])
-        eval['rating3'] = np.mean(eval['rating3'])
-        eval['rating4'] = np.mean(eval['rating4'])
+        evaluations[eval]['rating0'] = np.mean(evaluations[eval]['rating0'])
+        evaluations[eval]['rating1'] = np.mean(evaluations[eval]['rating1'])
+        evaluations[eval]['rating2'] = np.mean(evaluations[eval]['rating2'])
+        evaluations[eval]['rating3'] = np.mean(evaluations[eval]['rating3'])
+        evaluations[eval]['rating4'] = np.mean(evaluations[eval]['rating4'])
 
     data = []
 
