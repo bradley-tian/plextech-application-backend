@@ -297,6 +297,7 @@ def evaluateResults():
             evaluations[judgments[grader]['rating3'][i][1]]['rating3'].append(judgments[grader]['rating3'][i][0])
             evaluations[judgments[grader]['rating4'][i][1]]['rating4'].append(judgments[grader]['rating4'][i][0])
 
+
     for eval in evaluations:
         evaluations[eval]['rating0'] = np.mean(evaluations[eval]['rating0'])
         evaluations[eval]['rating1'] = np.mean(evaluations[eval]['rating1'])
@@ -307,8 +308,9 @@ def evaluateResults():
     data = []
 
     for applicant in evaluations.keys():
-        eval = evaluations[applicant]
+        eval = {}
         eval['applicantID'] = applicant
+        eval.update(evaluations[applicant])
         data.append(eval)
 
     export = []
