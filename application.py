@@ -274,11 +274,11 @@ def evaluateResults():
         judgments[review['grader']]['rating4'].append((int(review['rating4']), review['applicantID']))
 
     for grader in judgments:
-        z_0 = stats.zscore(grader['rating0'])
-        z_1 = stats.zscore(grader['rating1'])
-        z_2 = stats.zscore(grader['rating2'])
-        z_3 = stats.zscore(grader['rating3'])
-        z_4 = stats.zscore(grader['rating4'])
+        z_0 = stats.zscore([x[0] for x in grader['rating0']])
+        z_1 = stats.zscore([x[0] for x in grader['rating1']])
+        z_2 = stats.zscore([x[0] for x in grader['rating2']])
+        z_3 = stats.zscore([x[0] for x in grader['rating3']])
+        z_4 = stats.zscore([x[0] for x in grader['rating4']])
 
         for i in range(len(z_0)):
             grader['rating0'][i] = (z_0[i], grader['rating0'][i][1])
