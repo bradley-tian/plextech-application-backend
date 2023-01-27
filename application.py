@@ -187,7 +187,6 @@ def assignGraders():
         app['assigned_to'].append(graders[current]['email'])
         app['assigned_to'].append(graders[(current + 1) % scope]['email'])
         app['assigned_to'].append(graders[(current + 2) % scope]['email'])
-        app['assigned_to'].append(graders[(current + 3) % scope]['email'])
         db.applicants.replace_one({"time_created": app['time_created']}, app)
         current = (current + 1) % scope
 
