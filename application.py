@@ -186,6 +186,9 @@ def assignGraders():
     for app in applicants:
         app['assigned_to'].append(graders[current]['email'])
         app['assigned_to'].append(graders[(current + 1) % scope]['email'])
+        app['assigned_to'].append(graders[(current + 2) % scope]['email'])
+        app['assigned_to'].append(graders[(current + 3) % scope]['email'])
+        app['assigned_to'].append(graders[(current + 4) % scope]['email'])
         db.applicants.replace_one({"time_created": app['time_created']}, app)
         current = (current + 1) % scope
 
@@ -200,6 +203,34 @@ def assignGraders():
             str(app['last_name']) + ", ID: " + str(app['time_created'])
         for grader in app['assigned_to']:
             assignments[grader].append(profile)
+
+    applicants = list(db.applicants.find())
+    leadership = {
+        'bradley_tian@berkeley.edu',
+        'sathvika@berkeley.edu',
+        'winstoncai@berkeley.edu',
+        'dyhuynh@berkeley.edu',
+        'akhilsukh@berkeley.edu',
+        'somup27@berkeley.edu',
+        'shamith09@berkeley.edu',
+        'tiajain@berkeley.edu',
+        'jennabustami@berkeley.edu',
+    }
+
+    currentLead = 0
+
+    for app in applicants:
+        included = False
+        for lead in leadership:
+            if lead in app['assigned_to']:
+                included = True
+        if not included: 
+            app['assigned_to'].append(leadership[currentLead])
+            db.applicants.replace_one({"time_created": app['time_created']}, app)
+            profile = str(app['first_name']) + " " + \
+            str(app['last_name']) + ", ID: " + str(app['time_created'])
+            assignments[leadership[currentLead]].append(profile)
+            currentLead = (currentLead + 1) % len(leadership)    
 
     return json.dumps(assignments)
 
@@ -350,10 +381,10 @@ def evaluateResults():
         eval['applicantID'] = applicant
         eval.update(evaluations[applicant])
         eval['total'] = round(((eval['rating0'] * w0 +
-                         eval['rating1'] * w1 +
-                         eval['rating2'] * w2 +
-                         eval['rating3'] * w3 +
-                         eval['rating4'] * w4) * 100), 2)
+                                eval['rating1'] * w1 +
+                                eval['rating2'] * w2 +
+                                eval['rating3'] * w3 +
+                                eval['rating4'] * w4) * 100), 2)
 
         data.append(eval)
 
