@@ -205,7 +205,7 @@ def assignGraders():
             assignments[grader].append(profile)
 
     applicants = list(db.applicants.find())
-    leadership = {
+    leadership = [
         'bradley_tian@berkeley.edu',
         'sathvika@berkeley.edu',
         'winstoncai@berkeley.edu',
@@ -215,7 +215,7 @@ def assignGraders():
         'shamith09@berkeley.edu',
         'tiajain@berkeley.edu',
         'jennabustami@berkeley.edu',
-    }
+    ]
 
     currentLead = 0
 
