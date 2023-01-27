@@ -213,6 +213,12 @@ def assignGraders():
         'shamith09@berkeley.edu',
         'tiajain@berkeley.edu',
         'jennabustami@berkeley.edu',
+        'denvernguyen00@berkeley.edu',
+        'epchao@berkeley.edu',
+        'howardm12138@berkeley.edu',
+        'preethi.m@berkeley.edu',
+        'rohanrk2003@berkeley.edu',
+        'samarth.ghai@berkeley.edu',
     ]
 
     currentLead = 0
