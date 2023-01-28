@@ -420,7 +420,7 @@ def checkProgress():
     applicants = list(db.applicants.find({}))
     incomplete = set()
     for app in applicants:
-            if app['graded_by'] == []:
+            if len(app['graded_by']) < 2:
                 incomplete.add(app['first_name'], app['last_name'], app['time_created'])
     incomplete = list(incomplete)
     return json.dumps(incomplete)
