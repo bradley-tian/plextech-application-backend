@@ -449,8 +449,11 @@ def evaluateResults():
         elif applicant['year'] == '2026':
             eval['total'] += 0.04
 
-        if applicant['race'] != 'Asian (including Indian subcontinent and Philippines origin)':
-            eval['total'] += 0.05
+        try:
+            if applicant['race'] != 'Asian (including Indian subcontinent and Philippines origin)':
+                eval['total'] += 0.05
+        except: 
+            pass
         
         if applicant['gender'] != 'Male':
             eval['total'] += 0.05
