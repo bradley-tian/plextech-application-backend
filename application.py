@@ -415,6 +415,16 @@ def evaluateResults():
 
     return json.dumps(export)
 
+@application.route('/check_progress', methods=['GET'])
+def checkProgress():
+    applicants = list(db.applicants.find({}))
+    incomplete = set()
+    for app in applicants:
+        for grader in app['assigned_to']:
+            if grader not in app['graded_by']:
+                incomplete.add(grader)
+    return json.dumps(incomplete)
+
 
 if __name__ == '__main__':
     application.run(debug=True)
