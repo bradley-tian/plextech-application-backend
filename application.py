@@ -426,7 +426,7 @@ def evaluateResults():
 
         eval['applicantID'] = applicant
         eval.update(evaluations[applicant])
-        eval['total'] = round((eval['resCommit'] * w0 +
+        eval['total'] = (eval['resCommit'] * w0 +
                                 eval['resLead'] * w1 +
                                 eval['resTech'] * w2 +
                                 eval['initiative'] * w3 +
@@ -435,8 +435,7 @@ def evaluateResults():
                                 eval['impact'] * w6 +
                                 eval['passion'] * w7 +
                                 eval['excellence'] * w8 +
-                                eval['commitment'] * w9
-                                ))
+                                eval['commitment'] * w9)
 
         applicant = list(db.applicants.find({'time_created': applicant}))[0]
 
