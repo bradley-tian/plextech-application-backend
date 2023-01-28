@@ -322,74 +322,140 @@ def evaluateResults():
     judgments = defaultdict(lambda: defaultdict(list))
 
     for review in reviews:
-        judgments[review['grader']]['rating0'].append(
-            (int(review['rating0']), review['applicantID']))
-        judgments[review['grader']]['rating1'].append(
-            (int(review['rating1']), review['applicantID']))
-        judgments[review['grader']]['rating2'].append(
-            (int(review['rating2']), review['applicantID']))
-        judgments[review['grader']]['rating3'].append(
-            (int(review['rating3']), review['applicantID']))
-        judgments[review['grader']]['rating4'].append(
-            (int(review['rating4']), review['applicantID']))
+        judgments[review['grader']]['resCommit'].append(
+            (int(review['resCommit']), review['applicantID']))
+        judgments[review['grader']]['resLead'].append(
+            (int(review['resLead']), review['applicantID']))
+        judgments[review['grader']]['resTech'].append(
+            (int(review['resTech']), review['applicantID']))
+        judgments[review['grader']]['initiative'].append(
+            (int(review['initiative']), review['applicantID']))
+        judgments[review['grader']]['problem'].append(
+            (int(review['problem']), review['applicantID']))
+        judgments[review['grader']]['ansCommit'].append(
+            (int(review['ansCommit']), review['applicantID']))
+        judgments[review['grader']]['impact'].append(
+            (int(review['impact']), review['applicantID']))
+        judgments[review['grader']]['passion'].append(
+            (int(review['passion']), review['applicantID']))
+        judgments[review['grader']]['excellence'].append(
+            (int(review['excellence']), review['applicantID']))
+        judgments[review['grader']]['commitment'].append(
+            (int(review['commitment']), review['applicantID']))
 
     for grader in judgments:
-        z_0 = stats.zscore([x[0] for x in judgments[grader]['rating0']])
-        z_1 = stats.zscore([x[0] for x in judgments[grader]['rating1']])
-        z_2 = stats.zscore([x[0] for x in judgments[grader]['rating2']])
-        z_3 = stats.zscore([x[0] for x in judgments[grader]['rating3']])
-        z_4 = stats.zscore([x[0] for x in judgments[grader]['rating4']])
+        z_0 = stats.zscore([x[0] for x in judgments[grader]['resCommit']])
+        z_1 = stats.zscore([x[0] for x in judgments[grader]['resLead']])
+        z_2 = stats.zscore([x[0] for x in judgments[grader]['resTech']])
+        z_3 = stats.zscore([x[0] for x in judgments[grader]['initiative']])
+        z_4 = stats.zscore([x[0] for x in judgments[grader]['problem']])
+        z_5 = stats.zscore([x[0] for x in judgments[grader]['ansCommit']])
+        z_6 = stats.zscore([x[0] for x in judgments[grader]['impact']])
+        z_7 = stats.zscore([x[0] for x in judgments[grader]['passion']])
+        z_8 = stats.zscore([x[0] for x in judgments[grader]['excellence']])
+        z_9 = stats.zscore([x[0] for x in judgments[grader]['commitment']])
 
         for i in range(len(z_0)):
-            judgments[grader]['rating0'][i] = (
-                z_0[i], judgments[grader]['rating0'][i][1])
-            judgments[grader]['rating1'][i] = (
-                z_1[i], judgments[grader]['rating1'][i][1])
-            judgments[grader]['rating2'][i] = (
-                z_2[i], judgments[grader]['rating2'][i][1])
-            judgments[grader]['rating3'][i] = (
-                z_3[i], judgments[grader]['rating3'][i][1])
-            judgments[grader]['rating4'][i] = (
-                z_4[i], judgments[grader]['rating4'][i][1])
+            judgments[grader]['resCommit'][i] = (
+                z_0[i], judgments[grader]['resCommit'][i][1])
+            judgments[grader]['resLead'][i] = (
+                z_1[i], judgments[grader]['resLead'][i][1])
+            judgments[grader]['resTech'][i] = (
+                z_2[i], judgments[grader]['resTech'][i][1])
+            judgments[grader]['initiative'][i] = (
+                z_3[i], judgments[grader]['initiative'][i][1])
+            judgments[grader]['problem'][i] = (
+                z_4[i], judgments[grader]['problem'][i][1])
+            judgments[grader]['ansCommit'][i] = (
+                z_5[i], judgments[grader]['ansCommit'][i][1])
+            judgments[grader]['impact'][i] = (
+                z_6[i], judgments[grader]['impact'][i][1])
+            judgments[grader]['passion'][i] = (
+                z_7[i], judgments[grader]['passion'][i][1])
+            judgments[grader]['excellence'][i] = (
+                z_8[i], judgments[grader]['excellence'][i][1])
+            judgments[grader]['commitment'][i] = (
+                z_9[i], judgments[grader]['commitment'][i][1])
+            
 
     evaluations = defaultdict(lambda: defaultdict(list))
 
     for grader in judgments:
-        for i in range(len(judgments[grader]['rating0'])):
-            evaluations[judgments[grader]['rating0'][i][1]]['rating0'].append(
-                judgments[grader]['rating0'][i][0])
-            evaluations[judgments[grader]['rating1'][i][1]]['rating1'].append(
-                judgments[grader]['rating1'][i][0])
-            evaluations[judgments[grader]['rating2'][i][1]]['rating2'].append(
-                judgments[grader]['rating2'][i][0])
-            evaluations[judgments[grader]['rating3'][i][1]]['rating3'].append(
-                judgments[grader]['rating3'][i][0])
-            evaluations[judgments[grader]['rating4'][i][1]]['rating4'].append(
-                judgments[grader]['rating4'][i][0])
+        for i in range(len(judgments[grader]['resCommit'])):
+            evaluations[judgments[grader]['resCommit'][i][1]]['resCommit'].append(
+                judgments[grader]['resCommit'][i][0])
+            evaluations[judgments[grader]['resLead'][i][1]]['resLead'].append(
+                judgments[grader]['resLead'][i][0])
+            evaluations[judgments[grader]['resTech'][i][1]]['resTech'].append(
+                judgments[grader]['resTech'][i][0])
+            evaluations[judgments[grader]['initiative'][i][1]]['initiative'].append(
+                judgments[grader]['initiative'][i][0])
+            evaluations[judgments[grader]['problem'][i][1]]['problem'].append(
+                judgments[grader]['problem'][i][0])
+            evaluations[judgments[grader]['ansCommit'][i][1]]['ansCommit'].append(
+                judgments[grader]['ansCommit'][i][0])
+            evaluations[judgments[grader]['impact'][i][1]]['impact'].append(
+                judgments[grader]['impact'][i][0])
+            evaluations[judgments[grader]['passion'][i][1]]['passion'].append(
+                judgments[grader]['passion'][i][0])
+            evaluations[judgments[grader]['excellence'][i][1]]['excellence'].append(
+                judgments[grader]['excellence'][i][0])     
+            evaluations[judgments[grader]['commitment'][i][1]]['commitment'].append(
+                judgments[grader]['commitment'][i][0])             
 
     for eval in evaluations:
-        evaluations[eval]['rating0'] = np.mean(evaluations[eval]['rating0'])
-        evaluations[eval]['rating1'] = np.mean(evaluations[eval]['rating1'])
-        evaluations[eval]['rating2'] = np.mean(evaluations[eval]['rating2'])
-        evaluations[eval]['rating3'] = np.mean(evaluations[eval]['rating3'])
-        evaluations[eval]['rating4'] = np.mean(evaluations[eval]['rating4'])
+        evaluations[eval]['resCommit'] = np.mean(evaluations[eval]['resCommit'])
+        evaluations[eval]['resLead'] = np.mean(evaluations[eval]['resLead'])
+        evaluations[eval]['resTech'] = np.mean(evaluations[eval]['resTech'])
+        evaluations[eval]['initiative'] = np.mean(evaluations[eval]['initiative'])
+        evaluations[eval]['problem'] = np.mean(evaluations[eval]['problem'])
+        evaluations[eval]['ansCommit'] = np.mean(evaluations[eval]['ansCommit'])
+        evaluations[eval]['impact'] = np.mean(evaluations[eval]['impact'])
+        evaluations[eval]['passion'] = np.mean(evaluations[eval]['passion'])
+        evaluations[eval]['excellence'] = np.mean(evaluations[eval]['excellence'])
+        evaluations[eval]['commitment'] = np.mean(evaluations[eval]['commitment'])
 
     data = []
+    applicants = list(db.applicants.find())
 
     for applicant in evaluations.keys():
         eval = {}
 
         # Edit weighings here
-        w0, w1, w2, w3, w4 = 0.2, 0.2, 0.2, 0.2, 0.2
+        w0, w1, w2, w3, w4, w5, w6, w7, w8, w9 = 0.1176, 0.08824, 0.08824, 0.1176, 0.1176, 0.1176, 0.1176, 0.08824, 0.08824, 0.0588
 
         eval['applicantID'] = applicant
         eval.update(evaluations[applicant])
-        eval['total'] = round(((eval['rating0'] * w0 +
-                                eval['rating1'] * w1 +
-                                eval['rating2'] * w2 +
-                                eval['rating3'] * w3 +
-                                eval['rating4'] * w4) * 100), 2)
+        eval['total'] = round((eval['resCommit'] * w0 +
+                                eval['resLead'] * w1 +
+                                eval['resTech'] * w2 +
+                                eval['initiative'] * w3 +
+                                eval['problem'] * w4 +
+                                eval['ansCommit'] * w5 +
+                                eval['impact'] * w6 +
+                                eval['passion'] * w7 +
+                                eval['excellence'] * w8 +
+                                eval['commitment'] * w9
+                                ))
 
+        applicant = list(db.applicants.find({'time_created': applicant}))[0]
+
+        if applicant['year'] == '2023':
+            eval['total'] += 0.01
+        elif applicant['year'] == '2024':
+            eval['total'] += 0.02
+        elif applicant['year'] == '2025':
+            eval['total'] += 0.03
+        elif applicant['year'] == '2026':
+            eval['total'] += 0.04
+
+        if applicant['race'] != 'Asian (including Indian subcontinent and Philippines origin)':
+            eval['total'] += 0.05
+        
+        if applicant['gender'] != 'Male':
+            eval['total'] += 0.05
+
+        eval['total'] = round((eval['total'] * 100), 2)
         data.append(eval)
 
     export = []
