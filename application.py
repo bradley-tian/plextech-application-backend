@@ -435,21 +435,18 @@ def evaluateResults():
                                 eval['impact'] * w6 +
                                 eval['passion'] * w7 +
                                 eval['excellence'] * w8 +
-                                eval['commitment'] * w9)
+                                0 * w9)
 
         applicant = list(db.applicants.find({'time_created': applicant}))[0]
 
-        try:
-            if applicant['year'] == '2023':
-                eval['total'] += 0.01
-            elif applicant['year'] == '2024':
-                eval['total'] += 0.02
-            elif applicant['year'] == '2025':
-                eval['total'] += 0.03
-            elif applicant['year'] == '2026':
-                eval['total'] += 0.04
-        except:
-            pass
+        if applicant['year'] == '2023':
+            eval['total'] += 0.01
+        elif applicant['year'] == '2024':
+            eval['total'] += 0.02
+        elif applicant['year'] == '2025':
+            eval['total'] += 0.03
+        elif applicant['year'] == '2026':
+            eval['total'] += 0.04
 
         try:
             if applicant['race'] != 'Asian (including Indian subcontinent and Philippines origin)':
@@ -457,11 +454,8 @@ def evaluateResults():
         except: 
             pass
         
-        try:
-            if applicant['gender'] != 'Male':
-                eval['total'] += 0.05
-        except: 
-            pass
+        if applicant['gender'] != 'Male':
+            eval['total'] += 0.05
 
         eval['total'] = round((eval['total'] * 100), 2)
         data.append(eval)
