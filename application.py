@@ -423,8 +423,7 @@ def checkProgress():
         for grader in app['assigned_to']:
             if grader not in app['graded_by']:
                 incomplete.add(grader)
-    return json.dumps(incomplete)
-
+    return json.dumps(list(incomplete))
 
 if __name__ == '__main__':
     application.run(debug=True)
