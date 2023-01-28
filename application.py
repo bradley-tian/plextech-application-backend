@@ -422,7 +422,7 @@ def checkProgress():
     for app in applicants:
         for grader in app['assigned_to']:
             if grader not in app['graded_by']:
-                incomplete.add(grader)
+                incomplete.add((grader, app['first_name'], app['last_name']))
     incomplete = list(incomplete)
     return json.dumps(incomplete)
 
