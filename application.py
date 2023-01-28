@@ -418,14 +418,14 @@ def evaluateResults():
     data = []
     applicants = list(db.applicants.find())
 
-    for applicant in evaluations.keys():
+    for applicantID in evaluations.keys():
         eval = {}
 
         # Edit weighings here
         w0, w1, w2, w3, w4, w5, w6, w7, w8, w9 = 0.1176, 0.08824, 0.08824, 0.1176, 0.1176, 0.1176, 0.1176, 0.08824, 0.08824, 0.0588
 
-        eval['applicantID'] = applicant
-        eval.update(evaluations[applicant])
+        eval['applicantID'] = applicantID
+        eval.update(evaluations[applicantID])
         eval['total'] = (eval['resCommit'] * w0 +
                                 eval['resLead'] * w1 +
                                 eval['resTech'] * w2 +
@@ -437,7 +437,11 @@ def evaluateResults():
                                 eval['excellence'] * w8 +
                                 0 * w9)
 
-        applicant = list(db.applicants.find({'time_created': applicant}))[0]
+        applicant = {}
+        for app in applicants:
+            if app['time_created'] == applicantID:
+                applicant = app
+                break
 
         if applicant['year'] == '2023':
             eval['total'] += 0.01
@@ -453,6 +457,8 @@ def evaluateResults():
         
         if applicant['gender'] != 'Male':
             eval['total'] += 0.05
+
+        eval['first_name'] = applicant['']
 
         eval['total'] = round((eval['total'] * 100), 2)
         data.append(eval)
