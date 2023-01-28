@@ -421,7 +421,7 @@ def checkProgress():
     incomplete = set()
     for app in applicants:
             if len(app['graded_by']) < 2:
-                incomplete.add(app['first_name'], app['last_name'], app['time_created'])
+                incomplete.add((app['first_name'], app['last_name'], app['time_created']))
     incomplete = list(incomplete)
     return json.dumps(incomplete)
 
