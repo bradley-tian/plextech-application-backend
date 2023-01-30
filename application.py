@@ -458,7 +458,8 @@ def evaluateResults():
         if applicant['gender'] != 'Male':
             eval['total'] += 0.05
 
-        eval['first_name'] = applicant['']
+        eval['first_name'] = applicant['first_name']
+        eval['last_name'] = applicant['last_name']
 
         eval['total'] = round((eval['total'] * 100), 2)
         data.append(eval)
@@ -499,4 +500,4 @@ def checkProgress():
 if __name__ == '__main__':
     application.run(debug=True)
 
-# Rebooting Server Test 20
+# Rebooting Server Test Post Op
