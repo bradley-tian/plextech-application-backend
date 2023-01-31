@@ -8,6 +8,7 @@ import os
 from collections import defaultdict
 import numpy as np
 from scipy import stats
+from os import environ
 
 application = Flask(__name__)
 cors = CORS(application)
@@ -154,7 +155,7 @@ def getAnalytics():
     for app in applicants:
 
         analytics[yearTranslations[app['year']]] += 1
-        
+
         if not app['gender'] in analytics:
             analytics['other'] += 1
         else:
@@ -348,8 +349,8 @@ def evaluateResults():
             z_scores.append(stats.zscore([x[0]
                             for x in judgments[grader][quality]]))
 
-        for i in range(z_scores[0]):
-            for j in range(z_scores):
+        for i in range(len(z_scores[0])):
+            for j in range(len(z_scores)):
                 judgments[grader]['resCommit'][i] = (
                     z_scores[j][i], judgments[grader][qualities[j]][i][1])
 
