@@ -113,62 +113,57 @@ def removeGrader():
 def getAnalytics():
     applicants = list(db.applicants.find())
     count = len(applicants)
-    freshmen, sophomore, junior, senior = 0, 0, 0, 0
-    male, female, other = 0, 0, 0
-    american_indian, asian, black, white, middle_eastern, pacific_islander = 0, 0, 0, 0, 0, 0
 
-    for app in applicants:
-        year = app['year']
-        if year == "2023":
-            senior += 1
-        elif year == "2024":
-            junior += 1
-        elif year == "2025":
-            sophomore += 1
-        elif year == "2026":
-            freshmen += 1
-
-        gender = app['gender']
-        if gender == "Male":
-            male += 1
-        elif gender == "Female":
-            female += 1
-        else:
-            other += 1
-
-        if 'race' in app:
-            race = app['race']
-            if race == 'American Indian or Alaska Native':
-                american_indian += 1
-            elif race == "Asian (including Indian subcontinent and Philippines origin)":
-                asian += 1
-            elif race == 'Black or African American':
-                black += 1
-            elif race == 'White':
-                white += 1
-            elif race == 'Middle Eastern':
-                middle_eastern += 1
-            elif race == "Native American or Other Pacific Islander":
-                pacific_islander += 1
-
-    result = {
-        'count': count,
-        'freshmen': freshmen,
-        'sophomore': sophomore,
-        'junior': junior,
-        'senior': senior,
-        'male': male,
-        'female': female,
-        'other': other,
-        'American_Indian': american_indian,
-        "Asian": asian,
-        "Black": black,
-        "White": white,
-        "Middle_Eastern": middle_eastern,
-        "Pacific_Islander": pacific_islander,
+    # Change this every semester
+    yearTranslations = {
+        '2023': 'senior',
+        '2024': 'junior',
+        '2025': 'sophomore',
+        '2026': 'freshman',
     }
 
-    return json.dumps(result, default=str)
+    ethnicTranslations = {
+        'American Indian or Alaska Native': 'American_Indian',
+        'Asian (including Indian subcontinent and Philippines origin)': 'Asian',
+        'Black or African American': 'Black',
+        'White': 'White',
+        'Middle Eastern': 'Middle_Eastern',
+        'Native American or Other Pacific Islander': 'Pacific_Islander',
+        'Hispanic or Latino': 'Hispanic',
+    }
+
+    # Edit demographic information as needed
+    analytics = {
+        'count': count,
+        'freshman': 0,
+        'sophomore': 0,
+        'junior': 0,
+        'senior': 0,
+        'male': 0,
+        'female': 0,
+        'other': 0,
+        'American_Indian': 0,
+        'Asian': 0,
+        'Black': 0,
+        'White': 0,
+        'Middle_Eastern': 0,
+        'Pacific_Islander': 0,
+        'Hispanic': 0, 
+    }
+
+    for app in applicants:
+
+        analytics[yearTranslations[app['year']]] += 1
+        
+        if not app['gender'] in analytics:
+            analytics['other'] += 1
+        else:
+            analytics[app['gender'].lower()] += 1
+
+        if 'race' in app:
+            analytics[ethnicTranslations[app['race']]] += 1
+
+    return json.dumps(analytics, default=str)
 
 
 @application.route('/assign_graders', methods=['GET'])
@@ -183,10 +178,12 @@ def assignGraders():
     if current >= scope:
         current = current % scope
 
+    # How many graders are we assigning to the same applicant?
+    redundancy = 3
+
     for app in applicants:
-        app['assigned_to'].append(graders[current]['email'])
-        app['assigned_to'].append(graders[(current + 1) % scope]['email'])
-        app['assigned_to'].append(graders[(current + 2) % scope]['email'])
+        for i in range(redundancy):
+            app['assigned_to'].append(graders[(current + i) % scope]['email'])
         db.applicants.replace_one({"time_created": app['time_created']}, app)
         current = (current + 1) % scope
 
@@ -203,6 +200,9 @@ def assignGraders():
             assignments[grader].append(profile)
 
     applicants = list(db.applicants.find())
+
+    # Assigning leadership guarantees to each applicant
+    # Replace the email addresses below per each semester
     leadership = [
         'bradley_tian@berkeley.edu',
         'sathvika@berkeley.edu',
@@ -228,13 +228,14 @@ def assignGraders():
         for lead in leadership:
             if lead in app['assigned_to']:
                 included = True
-        if not included: 
+        if not included:
             app['assigned_to'].append(leadership[currentLead])
-            db.applicants.replace_one({"time_created": app['time_created']}, app)
+            db.applicants.replace_one(
+                {"time_created": app['time_created']}, app)
             profile = str(app['first_name']) + " " + \
-            str(app['last_name']) + ", ID: " + str(app['time_created'])
+                str(app['last_name']) + ", ID: " + str(app['time_created'])
             assignments[leadership[currentLead]].append(profile)
-            currentLead = (currentLead + 1) % len(leadership)    
+            currentLead = (currentLead + 1) % len(leadership)
 
     return json.dumps(assignments)
 
@@ -321,99 +322,48 @@ def evaluateResults():
     reviews = list(db.reviews.find())
     judgments = defaultdict(lambda: defaultdict(list))
 
+    # Qualities graders will evaluate on the grading interface
+    qualities = [
+        'resCommit',
+        'resLead',
+        'resTech',
+        'initiative',
+        'problem',
+        'ansCommit',
+        'impact',
+        'passion',
+        'excellence',
+        'commitment',
+    ]
+
     for review in reviews:
-        judgments[review['grader']]['resCommit'].append(
-            (int(review['resCommit']), review['applicantID']))
-        judgments[review['grader']]['resLead'].append(
-            (int(review['resLead']), review['applicantID']))
-        judgments[review['grader']]['resTech'].append(
-            (int(review['resTech']), review['applicantID']))
-        judgments[review['grader']]['initiative'].append(
-            (int(review['initiative']), review['applicantID']))
-        judgments[review['grader']]['problem'].append(
-            (int(review['problem']), review['applicantID']))
-        judgments[review['grader']]['ansCommit'].append(
-            (int(review['ansCommit']), review['applicantID']))
-        judgments[review['grader']]['impact'].append(
-            (int(review['impact']), review['applicantID']))
-        judgments[review['grader']]['passion'].append(
-            (int(review['passion']), review['applicantID']))
-        judgments[review['grader']]['excellence'].append(
-            (int(review['excellence']), review['applicantID']))
-        judgments[review['grader']]['commitment'].append(
-            (int(review['commitment']), review['applicantID']))
+        for quality in qualities:
+            judgments[review['grader']][quality].append(
+                (int(review[quality]), review['applicantID']))
+
+    z_scores = []
 
     for grader in judgments:
-        z_0 = stats.zscore([x[0] for x in judgments[grader]['resCommit']])
-        z_1 = stats.zscore([x[0] for x in judgments[grader]['resLead']])
-        z_2 = stats.zscore([x[0] for x in judgments[grader]['resTech']])
-        z_3 = stats.zscore([x[0] for x in judgments[grader]['initiative']])
-        z_4 = stats.zscore([x[0] for x in judgments[grader]['problem']])
-        z_5 = stats.zscore([x[0] for x in judgments[grader]['ansCommit']])
-        z_6 = stats.zscore([x[0] for x in judgments[grader]['impact']])
-        z_7 = stats.zscore([x[0] for x in judgments[grader]['passion']])
-        z_8 = stats.zscore([x[0] for x in judgments[grader]['excellence']])
-        z_9 = stats.zscore([x[0] for x in judgments[grader]['commitment']])
+        for quality in qualities:
+            z_scores.append(stats.zscore([x[0]
+                            for x in judgments[grader][quality]]))
 
-        for i in range(len(z_0)):
-            judgments[grader]['resCommit'][i] = (
-                z_0[i], judgments[grader]['resCommit'][i][1])
-            judgments[grader]['resLead'][i] = (
-                z_1[i], judgments[grader]['resLead'][i][1])
-            judgments[grader]['resTech'][i] = (
-                z_2[i], judgments[grader]['resTech'][i][1])
-            judgments[grader]['initiative'][i] = (
-                z_3[i], judgments[grader]['initiative'][i][1])
-            judgments[grader]['problem'][i] = (
-                z_4[i], judgments[grader]['problem'][i][1])
-            judgments[grader]['ansCommit'][i] = (
-                z_5[i], judgments[grader]['ansCommit'][i][1])
-            judgments[grader]['impact'][i] = (
-                z_6[i], judgments[grader]['impact'][i][1])
-            judgments[grader]['passion'][i] = (
-                z_7[i], judgments[grader]['passion'][i][1])
-            judgments[grader]['excellence'][i] = (
-                z_8[i], judgments[grader]['excellence'][i][1])
-            judgments[grader]['commitment'][i] = (
-                z_9[i], judgments[grader]['commitment'][i][1])
-            
+        for i in range(z_scores[0]):
+            for j in range(z_scores):
+                judgments[grader]['resCommit'][i] = (
+                    z_scores[j][i], judgments[grader][qualities[j]][i][1])
 
     evaluations = defaultdict(lambda: defaultdict(list))
 
     for grader in judgments:
-        for i in range(len(judgments[grader]['resCommit'])):
-            evaluations[judgments[grader]['resCommit'][i][1]]['resCommit'].append(
-                judgments[grader]['resCommit'][i][0])
-            evaluations[judgments[grader]['resLead'][i][1]]['resLead'].append(
-                judgments[grader]['resLead'][i][0])
-            evaluations[judgments[grader]['resTech'][i][1]]['resTech'].append(
-                judgments[grader]['resTech'][i][0])
-            evaluations[judgments[grader]['initiative'][i][1]]['initiative'].append(
-                judgments[grader]['initiative'][i][0])
-            evaluations[judgments[grader]['problem'][i][1]]['problem'].append(
-                judgments[grader]['problem'][i][0])
-            evaluations[judgments[grader]['ansCommit'][i][1]]['ansCommit'].append(
-                judgments[grader]['ansCommit'][i][0])
-            evaluations[judgments[grader]['impact'][i][1]]['impact'].append(
-                judgments[grader]['impact'][i][0])
-            evaluations[judgments[grader]['passion'][i][1]]['passion'].append(
-                judgments[grader]['passion'][i][0])
-            evaluations[judgments[grader]['excellence'][i][1]]['excellence'].append(
-                judgments[grader]['excellence'][i][0])     
-            evaluations[judgments[grader]['commitment'][i][1]]['commitment'].append(
-                judgments[grader]['commitment'][i][0])             
+        for i in range(len(judgments[grader][qualities[0]])):
+            for quality in qualities:
+                evaluations[judgments[grader][quality][i][1]][quality].append(
+                    judgments[grader][quality][i][0])
 
     for eval in evaluations:
-        evaluations[eval]['resCommit'] = np.mean(evaluations[eval]['resCommit'])
-        evaluations[eval]['resLead'] = np.mean(evaluations[eval]['resLead'])
-        evaluations[eval]['resTech'] = np.mean(evaluations[eval]['resTech'])
-        evaluations[eval]['initiative'] = np.mean(evaluations[eval]['initiative'])
-        evaluations[eval]['problem'] = np.mean(evaluations[eval]['problem'])
-        evaluations[eval]['ansCommit'] = np.mean(evaluations[eval]['ansCommit'])
-        evaluations[eval]['impact'] = np.mean(evaluations[eval]['impact'])
-        evaluations[eval]['passion'] = np.mean(evaluations[eval]['passion'])
-        evaluations[eval]['excellence'] = np.mean(evaluations[eval]['excellence'])
-        evaluations[eval]['commitment'] = np.mean(evaluations[eval]['commitment'])
+        for quality in qualities:
+            evaluations[eval][quality] = np.mean(evaluations[eval][quality])
 
     data = []
     applicants = list(db.applicants.find())
@@ -421,21 +371,25 @@ def evaluateResults():
     for applicantID in evaluations.keys():
         eval = {}
 
-        # Edit weighings here
-        w0, w1, w2, w3, w4, w5, w6, w7, w8, w9 = 0.1176, 0.08824, 0.08824, 0.1176, 0.1176, 0.1176, 0.1176, 0.08824, 0.08824, 0.0588
+        # Edit weightings here
+        # Ensure that weighting order corresponds the ordering of qualities
+        weightings = [
+            0.1176,
+            0.08824,
+            0.08824,
+            0.1176,
+            0.1176,
+            0.1176,
+            0.1176,
+            0.8824,
+            0.8824,
+            0.0588,
+        ]
 
         eval['applicantID'] = applicantID
         eval.update(evaluations[applicantID])
-        eval['total'] = (eval['resCommit'] * w0 +
-                                eval['resLead'] * w1 +
-                                eval['resTech'] * w2 +
-                                eval['initiative'] * w3 +
-                                eval['problem'] * w4 +
-                                eval['ansCommit'] * w5 +
-                                eval['impact'] * w6 +
-                                eval['passion'] * w7 +
-                                eval['excellence'] * w8 +
-                                0 * w9)
+        for i in range(len(qualities)):
+            eval['total'] += (eval[qualities[i]] * weightings[i])
 
         applicant = {}
         for app in applicants:
@@ -443,18 +397,21 @@ def evaluateResults():
                 applicant = app
                 break
 
-        if applicant['year'] == '2023':
-            eval['total'] += 0.01
-        elif applicant['year'] == '2024':
-            eval['total'] += 0.02
-        elif applicant['year'] == '2025':
-            eval['total'] += 0.03
-        elif applicant['year'] == '2026':
-            eval['total'] += 0.04
+        # Graduation year bonus; edit this every semester
+        year_bonus = {
+            '2023': 0,
+            '2024': 0.01,
+            '2025': 0.02,
+            '2026': 0.03,
+        }
+        eval['total'] += year_bonus[applicant['year']]
 
-        if 'race' in applicant and applicant['race'] != 'Asian (including Indian subcontinent and Philippines origin)':
+        # URM diversity bonus
+        if ('race' in applicant and
+                applicant['race'] != 'Asian (including Indian subcontinent and Philippines origin)'):
             eval['total'] += 0.05
-        
+
+        # Gender bonus
         if applicant['gender'] != 'Male':
             eval['total'] += 0.05
 
@@ -487,15 +444,18 @@ def evaluateResults():
 
     return json.dumps(export)
 
+
 @application.route('/check_progress', methods=['GET'])
 def checkProgress():
     applicants = list(db.applicants.find({}))
     incomplete = set()
     for app in applicants:
-            if len(app['graded_by']) < 2:
-                incomplete.add((app['first_name'], app['last_name'], app['time_created']))
+        if len(app['graded_by']) < 2:
+            incomplete.add(
+                (app['first_name'], app['last_name'], app['time_created']))
     incomplete = list(incomplete)
     return json.dumps(incomplete)
+
 
 if __name__ == '__main__':
     application.run(debug=True)
