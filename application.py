@@ -346,7 +346,7 @@ def evaluateResults():
     for grader in judgments:
         for quality in qualities:
             if quality == 'commitment':
-                z = [x[0] for x in judgments[grader][quality]]
+                z = [int(x[0] / 10) for x in judgments[grader][quality]]
             else:
                 z = stats.zscore([x[0] for x in judgments[grader][quality]])
             z_scores.append(z)
