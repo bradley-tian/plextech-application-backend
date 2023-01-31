@@ -345,7 +345,10 @@ def evaluateResults():
         
     for grader in judgments:
         for quality in qualities:
-            z = stats.zscore([x[0] for x in judgments[grader][quality]])
+            if quality == 'commitment':
+                z = [x[0] for x in judgments[grader][quality]]
+            else:
+                z = stats.zscore([x[0] for x in judgments[grader][quality]])
             z_scores.append(z)
 
         for i in range(len(z_scores)):
@@ -395,17 +398,21 @@ def evaluateResults():
             0.0588,
         ]
 
+        applicant = {}
+        for app in applicants:
+            if app['time_created'] == applicantID:
+                applicant = app
+
         eval['applicantID'] = applicantID
+        eval['first_name'] = applicant['first_name']
+        eval['last_name'] = applicant['last_name']
         eval.update(evaluations[applicantID])
         eval['total'] = 0
 
         for i in range(len(qualities)):
             eval['total'] += (eval[qualities[i]] * weightings[i])
 
-        applicant = {}
-        for app in applicants:
-            if app['time_created'] == applicantID:
-                applicant = app
+        
 
         # Graduation year bonus; edit this every semester
         year_bonus = {
@@ -424,9 +431,6 @@ def evaluateResults():
         # Gender bonus
         if applicant['gender'] != 'Male':
             eval['total'] += 0.05
-
-        eval['first_name'] = applicant['first_name']
-        eval['last_name'] = applicant['last_name']
 
         eval['total'] = round((eval['total'] * 100), 2)
         data.append(eval)
