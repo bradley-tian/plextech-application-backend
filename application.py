@@ -47,7 +47,6 @@ def getApplicants(grader):
         {"$and": [{'assigned_to': grader}, {'graded_by': {'$ne': grader}}]}))
     return json.dumps(documents, default=str)
 
-
 @application.route('/add_review', methods=['POST'])
 def addReview():
     review = json.loads(request.get_data(as_text=True))
@@ -112,7 +111,7 @@ def removeGrader():
 
 @application.route('/analytics', methods=['GET'])
 def getAnalytics():
-    applicants = list(db.applicants.find())
+    applicants = list(db.applicants.find({}, {"year": 1, "gender": 1, "race": 1,}))
     count = len(applicants)
 
     # Change this every semester
@@ -161,7 +160,7 @@ def getAnalytics():
         else:
             analytics[app['gender'].lower()] += 1
 
-        if 'race' in app:
+        if 'race' in app and app['race'] != "Prefer not to answer":
             analytics[ethnicTranslations[app['race']]] += 1
 
     return json.dumps(analytics, default=str)
@@ -343,16 +342,18 @@ def evaluateResults():
                 (int(review[quality]), review['applicantID']))
 
     z_scores = []
-
+        
     for grader in judgments:
         for quality in qualities:
-            z_scores.append(stats.zscore([x[0]
-                            for x in judgments[grader][quality]]))
+            z = stats.zscore([x[0] for x in judgments[grader][quality]])
+            z_scores.append(z)
 
-        for i in range(len(z_scores[0])):
-            for j in range(len(z_scores)):
-                judgments[grader]['resCommit'][i] = (
-                    z_scores[j][i], judgments[grader][qualities[j]][i][1])
+        for i in range(len(z_scores)):
+            for j in range(len(z_scores[i])):
+                judgments[grader][qualities[i]][j] = (
+                    z_scores[i][j], judgments[grader][qualities[i]][j][1])
+        
+        z_scores = []
 
     evaluations = defaultdict(lambda: defaultdict(list))
 
@@ -367,7 +368,14 @@ def evaluateResults():
             evaluations[eval][quality] = np.mean(evaluations[eval][quality])
 
     data = []
-    applicants = list(db.applicants.find())
+    applicants = list(db.applicants.find({}, {
+        "time_created": 1,
+        "year": 1,
+        "race": 1,
+        "gender": 1,
+        "first_name": 1,
+        "last_name": 1,
+    }))
 
     for applicantID in evaluations.keys():
         eval = {}
@@ -389,6 +397,8 @@ def evaluateResults():
 
         eval['applicantID'] = applicantID
         eval.update(evaluations[applicantID])
+        eval['total'] = 0
+
         for i in range(len(qualities)):
             eval['total'] += (eval[qualities[i]] * weightings[i])
 
@@ -396,7 +406,6 @@ def evaluateResults():
         for app in applicants:
             if app['time_created'] == applicantID:
                 applicant = app
-                break
 
         # Graduation year bonus; edit this every semester
         year_bonus = {
@@ -425,7 +434,7 @@ def evaluateResults():
     export = []
 
     if len(data) == 0:
-        return json.dumps([])
+        return json.dumps([], default=str)
 
     with open("evaluations.csv", "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=data[0].keys())
@@ -443,7 +452,7 @@ def evaluateResults():
     except:
         print("ERROR: CSV FILE NOT FOUND")
 
-    return json.dumps(export)
+    return json.dumps(export, default=str)
 
 
 @application.route('/check_progress', methods=['GET'])
