@@ -20,7 +20,8 @@ except AttributeError:
 else:
     ssl._create_default_https_context = _create_unverified_https_context
 
-CONNECTION_STRING = "mongodb+srv://admin:plextechAdmin@cluster0.wds89j7.mongodb.net/?retryWrites=true&w=majority"
+# Enter administrator username and password here to access database
+CONNECTION_STRING = "mongodb+srv://[username]:[password]@cluster0.wds89j7.mongodb.net/?retryWrites=true&w=majority"
 
 client = pymongo.MongoClient(CONNECTION_STRING)
 db = client.get_database('application_pipeline')
