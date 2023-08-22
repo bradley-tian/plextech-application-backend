@@ -21,40 +21,116 @@ else:
     ssl._create_default_https_context = _create_unverified_https_context
 
 # Enter administrator username and password here to access database
-CONNECTION_STRING = "mongodb+srv://[username]:[password]@cluster0.wds89j7.mongodb.net/?retryWrites=true&w=majority"
+CONNECTION_STRING = "mongodb+srv://admin:plextechadmin@cluster0.wds89j7.mongodb.net/?retryWrites=true&w=majority"
 
 client = pymongo.MongoClient(CONNECTION_STRING)
 db = client.get_database('application_pipeline')
 user_collection = pymongo.collection.Collection(db, 'user_collection')
 
-graders = pymongo.collection.Collection(db, 'applicants')
+applicants = pymongo.collection.Collection(db, 'applicants_fa2023')
 graders = pymongo.collection.Collection(db, 'graders')
 reviews = pymongo.collection.Collection(db, 'reviews')
 admins = pymongo.collection.Collection(db, 'admins')
 trackers = pymongo.collection.Collection(db, 'trackers')
 errors = pymongo.collection.Collection(db, 'errors')
 
+# Assigning leadership guarantees to each applicant
+# Replace the email addresses below per each semester
+leadership = [
+    'bradley_tian@berkeley.edu',
+    'sathvika@berkeley.edu',
+    'winstoncai@berkeley.edu',
+    'dyhuynh@berkeley.edu',
+    'akhilsukh@berkeley.edu',
+    'somup27@berkeley.edu',
+    'shamith09@berkeley.edu',
+    'tiajain@berkeley.edu',
+    'jennabustami@berkeley.edu',
+    'denvernguyen00@berkeley.edu',
+    'epchao@berkeley.edu',
+    'howardm12138@berkeley.edu',
+    'preethi.m@berkeley.edu',
+    'rohanrk2003@berkeley.edu',
+    'samarth.ghai@berkeley.edu',
+]
+
+# Change this every semester
+yearTranslations = {
+    '2023': 'senior',
+    '2024': 'junior',
+    '2025': 'sophomore',
+    '2026': 'freshman',
+}
+
+ethnicTranslations = {
+    'American Indian or Alaska Native': 'American_Indian',
+    'Asian (including Indian subcontinent and Philippines origin)': 'Asian',
+    'Black or African American': 'Black',
+    'White': 'White',
+    'Middle Eastern': 'Middle_Eastern',
+    'Native American or Other Pacific Islander': 'Pacific_Islander',
+    'Hispanic or Latino': 'Hispanic',
+}
+
+# Qualities graders will evaluate on the grading interface
+qualities = [
+    'resCommit',
+    'resLead',
+    'resTech',
+    'initiative',
+    'problem',
+    'ansCommit',
+    'impact',
+    'passion',
+    'excellence',
+    'commitment',
+]
+
+# Edit weightings here
+# Ensure that weighting order corresponds the ordering of qualities
+weightings = [
+    0.1176,
+    0.08824,
+    0.08824,
+    0.1176,
+    0.1176,
+    0.1176,
+    0.1176,
+    0.8824,
+    0.8824,
+    0.0588,
+]
+
+# Graduation year bonus; edit this every semester
+year_bonus = {
+    '2023': 0,
+    '2024': 0.01,
+    '2025': 0.02,
+    '2026': 0.03,
+}
+
+URM_GENDER_BONUS = 0.5
 
 @application.route('/add_applicant', methods=['POST'])
 def addApplicant():
     application = json.loads(request.get_data(as_text=True))
-    db.applicants.insert_one(application)
+    applicants.insert_one(application)
     return jsonify(message='SUCCESS')
 
 
 @application.route('/get_applicant/<grader>', methods=['GET'])
 def getApplicants(grader):
-    documents = list(db.applicants.find(
+    documents = list(applicants.find(
         {"$and": [{'assigned_to': grader}, {'graded_by': {'$ne': grader}}]}))
     return json.dumps(documents, default=str)
 
 @application.route('/add_review', methods=['POST'])
 def addReview():
     review = json.loads(request.get_data(as_text=True))
-    applicant = list(db.applicants.find(
+    applicant = list(applicants.find(
         {"time_created": review['applicantID']}))[0]
     applicant['graded_by'].append(review['grader'])
-    db.applicants.replace_one(
+    applicants.replace_one(
         {"time_created": applicant['time_created']}, applicant)
     db.reviews.insert_one(review)
     return jsonify(message='SUCCESS')
@@ -112,26 +188,8 @@ def removeGrader():
 
 @application.route('/analytics', methods=['GET'])
 def getAnalytics():
-    applicants = list(db.applicants.find({}, {"year": 1, "gender": 1, "race": 1,}))
-    count = len(applicants)
-
-    # Change this every semester
-    yearTranslations = {
-        '2023': 'senior',
-        '2024': 'junior',
-        '2025': 'sophomore',
-        '2026': 'freshman',
-    }
-
-    ethnicTranslations = {
-        'American Indian or Alaska Native': 'American_Indian',
-        'Asian (including Indian subcontinent and Philippines origin)': 'Asian',
-        'Black or African American': 'Black',
-        'White': 'White',
-        'Middle Eastern': 'Middle_Eastern',
-        'Native American or Other Pacific Islander': 'Pacific_Islander',
-        'Hispanic or Latino': 'Hispanic',
-    }
+    apps = list(applicants.find({}, {"year": 1, "gender": 1, "race": 1,}))
+    count = len(apps)
 
     # Edit demographic information as needed
     analytics = {
@@ -152,7 +210,7 @@ def getAnalytics():
         'Hispanic': 0, 
     }
 
-    for app in applicants:
+    for app in apps:
 
         analytics[yearTranslations[app['year']]] += 1
 
@@ -170,7 +228,7 @@ def getAnalytics():
 @application.route('/assign_graders', methods=['GET'])
 def assignGraders():
     graders = list(db.graders.find())
-    applicants = list(db.applicants.find({'assigned_to': []}))
+    apps = list(applicants.find({'assigned_to': []}))
 
     tracker = list(db.trackers.find())[0]
     current = int(tracker['current'])
@@ -182,56 +240,36 @@ def assignGraders():
     # How many graders are we assigning to the same applicant?
     redundancy = 3
 
-    for app in applicants:
+    for app in apps:
         for i in range(redundancy):
             app['assigned_to'].append(graders[(current + i) % scope]['email'])
-        db.applicants.replace_one({"time_created": app['time_created']}, app)
+        applicants.replace_one({"time_created": app['time_created']}, app)
         current = (current + 1) % scope
 
     db.trackers.replace_one({'name': 'index'}, {'current': current})
 
-    applicants = list(db.applicants.find())
+    apps = list(applicants.find())
 
     assignments = defaultdict(list)
 
-    for app in applicants:
+    for app in apps:
         profile = str(app['first_name']) + " " + \
             str(app['last_name']) + ", ID: " + str(app['time_created'])
         for grader in app['assigned_to']:
             assignments[grader].append(profile)
 
-    applicants = list(db.applicants.find())
-
-    # Assigning leadership guarantees to each applicant
-    # Replace the email addresses below per each semester
-    leadership = [
-        'bradley_tian@berkeley.edu',
-        'sathvika@berkeley.edu',
-        'winstoncai@berkeley.edu',
-        'dyhuynh@berkeley.edu',
-        'akhilsukh@berkeley.edu',
-        'somup27@berkeley.edu',
-        'shamith09@berkeley.edu',
-        'tiajain@berkeley.edu',
-        'jennabustami@berkeley.edu',
-        'denvernguyen00@berkeley.edu',
-        'epchao@berkeley.edu',
-        'howardm12138@berkeley.edu',
-        'preethi.m@berkeley.edu',
-        'rohanrk2003@berkeley.edu',
-        'samarth.ghai@berkeley.edu',
-    ]
+    apps = list(applicants.find())
 
     currentLead = 0
 
-    for app in applicants:
+    for app in apps:
         included = False
         for lead in leadership:
             if lead in app['assigned_to']:
                 included = True
         if not included:
             app['assigned_to'].append(leadership[currentLead])
-            db.applicants.replace_one(
+            applicants.replace_one(
                 {"time_created": app['time_created']}, app)
             profile = str(app['first_name']) + " " + \
                 str(app['last_name']) + ", ID: " + str(app['time_created'])
@@ -271,7 +309,7 @@ def exportResults():
 @application.route('/export_applications', methods=['GET'])
 def exportApplications():
 
-    applications = list(db.applicants.find())
+    applications = list(applicants.find())
     for app in applications:
         app['resume'] = 'See Database'
     data = []
@@ -302,11 +340,11 @@ def exportApplications():
 def flushDatabase():
     db.reviews.delete_many({})
 
-    applicants = list(db.applicants.find())
-    for applicant in applicants:
+    apps = list(applicants.find())
+    for applicant in apps:
         applicant['graded_by'] = []
         applicant['assigned_to'] = []
-        db.applicants.replace_one(
+        applicants.replace_one(
             {"time_created": applicant['time_created']}, applicant)
     return jsonify(message='SUCCESS')
 
@@ -322,20 +360,6 @@ def reportError():
 def evaluateResults():
     reviews = list(db.reviews.find())
     judgments = defaultdict(lambda: defaultdict(list))
-
-    # Qualities graders will evaluate on the grading interface
-    qualities = [
-        'resCommit',
-        'resLead',
-        'resTech',
-        'initiative',
-        'problem',
-        'ansCommit',
-        'impact',
-        'passion',
-        'excellence',
-        'commitment',
-    ]
 
     for review in reviews:
         for quality in qualities:
@@ -372,7 +396,7 @@ def evaluateResults():
             evaluations[eval][quality] = np.mean(evaluations[eval][quality])
 
     data = []
-    applicants = list(db.applicants.find({}, {
+    apps = list(applicants.find({}, {
         "time_created": 1,
         "year": 1,
         "race": 1,
@@ -383,24 +407,8 @@ def evaluateResults():
 
     for applicantID in evaluations.keys():
         eval = {}
-
-        # Edit weightings here
-        # Ensure that weighting order corresponds the ordering of qualities
-        weightings = [
-            0.1176,
-            0.08824,
-            0.08824,
-            0.1176,
-            0.1176,
-            0.1176,
-            0.1176,
-            0.8824,
-            0.8824,
-            0.0588,
-        ]
-
         applicant = {}
-        for app in applicants:
+        for app in apps:
             if app['time_created'] == applicantID:
                 applicant = app
 
@@ -413,25 +421,16 @@ def evaluateResults():
         for i in range(len(qualities)):
             eval['total'] += (eval[qualities[i]] * weightings[i])
 
-        
-
-        # Graduation year bonus; edit this every semester
-        year_bonus = {
-            '2023': 0,
-            '2024': 0.01,
-            '2025': 0.02,
-            '2026': 0.03,
-        }
         eval['total'] += year_bonus[applicant['year']]
 
         # URM diversity bonus
         if ('race' in applicant and
                 applicant['race'] != 'Asian (including Indian subcontinent and Philippines origin)'):
-            eval['total'] += 0.05
+            eval['total'] += URM_GENDER_BONUS
 
         # Gender bonus
         if applicant['gender'] != 'Male':
-            eval['total'] += 0.05
+            eval['total'] += URM_GENDER_BONUS
 
         eval['total'] = round((eval['total'] * 100), 2)
         data.append(eval)
@@ -462,9 +461,9 @@ def evaluateResults():
 
 @application.route('/check_progress', methods=['GET'])
 def checkProgress():
-    applicants = list(db.applicants.find({}))
+    apps = list(applicants.find({}))
     incomplete = set()
-    for app in applicants:
+    for app in apps:
         if len(app['graded_by']) < 2:
             incomplete.add(
                 (app['first_name'], app['last_name'], app['time_created']))
