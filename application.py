@@ -9,6 +9,7 @@ from collections import defaultdict
 import numpy as np
 from scipy import stats
 from os import environ
+import logging
 
 application = Flask(__name__)
 cors = CORS(application)
@@ -433,6 +434,7 @@ def evaluateResults():
             eval['total'] += URM_GENDER_BONUS
 
         eval['total'] = round((eval['total'] * 100), 2)
+        logging.info("Total: ", eval['total'])
         data.append(eval)
 
     export = []
