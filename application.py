@@ -102,10 +102,10 @@ weightings = [
 
 # Graduation year bonus; edit this every semester
 year_bonus = {
-    '2023': 0,
-    '2024': 0.01,
-    '2025': 0.02,
-    '2026': 0.03,
+    '2024': 0,
+    '2025': 0.01,
+    '2026': 0.02,
+    '2027': 0.03,
 }
 
 # No more DEI bonuses
