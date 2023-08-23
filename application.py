@@ -39,27 +39,26 @@ errors = pymongo.collection.Collection(db, 'errors')
 leadership = [
     'bradley_tian@berkeley.edu',
     'sathvika@berkeley.edu',
-    'winstoncai@berkeley.edu',
-    'dyhuynh@berkeley.edu',
-    'akhilsukh@berkeley.edu',
-    'somup27@berkeley.edu',
     'shamith09@berkeley.edu',
     'tiajain@berkeley.edu',
-    'jennabustami@berkeley.edu',
-    'denvernguyen00@berkeley.edu',
-    'epchao@berkeley.edu',
     'howardm12138@berkeley.edu',
-    'preethi.m@berkeley.edu',
-    'rohanrk2003@berkeley.edu',
     'samarth.ghai@berkeley.edu',
+    'aakashpathak@berkeley.edu',
+    'epchao@berkeley.edu',
+    'jessica.young@berkeley.edu',
+    'malam2003@berkeley.edu',
+    'somup27@berkeley.edu',
+    'tylerauton-smith@berkeley.edu',
+    'vishal.bansal@berkeley.edu',
+    'v_perisic@berkeley.edu',
 ]
 
 # Change this every semester
 yearTranslations = {
-    '2023': 'senior',
-    '2024': 'junior',
-    '2025': 'sophomore',
-    '2026': 'freshman',
+    '2024': 'senior',
+    '2025': 'junior',
+    '2026': 'sophomore',
+    '2027': 'freshman',
 }
 
 ethnicTranslations = {
@@ -109,7 +108,8 @@ year_bonus = {
     '2026': 0.03,
 }
 
-URM_GENDER_BONUS = 0.5
+# No more DEI bonuses
+URM_GENDER_BONUS = 0.0
 
 @application.route('/add_applicant', methods=['POST'])
 def addApplicant():
@@ -198,9 +198,9 @@ def getAnalytics():
         'sophomore': 0,
         'junior': 0,
         'senior': 0,
-        'male': 0,
-        'female': 0,
-        'other': 0,
+        'Male': 0,
+        'Female': 0,
+        'Other': 0,
         'American_Indian': 0,
         'Asian': 0,
         'Black': 0,
@@ -465,8 +465,9 @@ def checkProgress():
     incomplete = set()
     for app in apps:
         if len(app['graded_by']) < 2:
+            missing = [grader for grader in app['assigned_to'] if grader not in app['graded_by']]
             incomplete.add(
-                (app['first_name'], app['last_name'], app['time_created']))
+                (app['first_name'], app['last_name'], app['time_created'], f'Missing reviews from: \n {missing}'))
     incomplete = list(incomplete)
     return json.dumps(incomplete)
 
