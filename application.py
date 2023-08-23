@@ -198,9 +198,9 @@ def getAnalytics():
         'sophomore': 0,
         'junior': 0,
         'senior': 0,
-        'Male': 0,
-        'Female': 0,
-        'Other': 0,
+        'male': 0,
+        'female': 0,
+        'other': 0,
         'American_Indian': 0,
         'Asian': 0,
         'Black': 0,
@@ -214,7 +214,7 @@ def getAnalytics():
 
         analytics[yearTranslations[app['year']]] += 1
 
-        if not app['gender'] in analytics:
+        if not app['gender'].lower() in analytics:
             analytics['other'] += 1
         else:
             analytics[app['gender'].lower()] += 1
