@@ -260,7 +260,7 @@ def assignGraders():
     for app in apps:
         for i in range(member_redundancy):
             next = (member_pointer + i) % member_scope
-            app['assigned_to'].append(members[next]['email'])
+            app['assigned_to'].append(members[next])
         for j in range(leadership_redundancy):
             next = (leadership_pointer + i) % leadership_scope
             app['assigned_to'].append(leadership[next])
