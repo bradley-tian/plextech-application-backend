@@ -46,12 +46,16 @@ leadership = [
     'samarth.ghai@berkeley.edu',
     'aakashpathak@berkeley.edu',
     'epchao@berkeley.edu',
+    'ragastya@berkeley.edu',
+    'taiga2002@berkeley.edu',
     'jessica.young@berkeley.edu',
     'malam2003@berkeley.edu',
+    'thomaswang@berkeley.edu',
     'somup27@berkeley.edu',
     'tylerauton-smith@berkeley.edu',
     'vishal.bansal@berkeley.edu',
     'v_perisic@berkeley.edu',
+    'preethi.m@berkeley.edu',
 ]
 
 # Change this every semester
@@ -74,31 +78,44 @@ ethnicTranslations = {
 
 # Qualities graders will evaluate on the grading interface
 qualities = [
-    'resCommit',
-    'resLead',
-    'resTech',
-    'initiative',
-    'problem',
-    'ansCommit',
-    'impact',
-    'passion',
-    'excellence',
-    'commitment',
+    'r1',
+    'r2',
+    'r3',
+    'r4',
+    'r5',
+    'r6',
+    'r7',
+    'r8',
+    'r9',
+    'r0',
 ]
 
 # Edit weightings here
-# Ensure that weighting order corresponds the ordering of qualities
-weightings = [
-    0.1176,
-    0.08824,
-    0.08824,
-    0.1176,
-    0.1176,
-    0.1176,
-    0.1176,
-    0.8824,
-    0.8824,
-    0.0588,
+# Ensure that the weighting order corresponds element-wise to the ordering of qualities
+curriculum_weightings = [
+    0.025,
+    0.025,
+    0.1,
+    0.15,
+    0.1,
+    0.1,
+    0.15,
+    0.1,
+    0.1,
+    0.05,
+]
+
+dev_weightings = [
+    0.1,
+    0.2,
+    0.1,
+    0.10588,
+    0.070588,
+    0.070588,
+    0.10588,
+    0.070588,
+    0.070588,
+    0.05,
 ]
 
 # Graduation year bonus; edit this every semester
@@ -364,6 +381,8 @@ def evaluateResults():
 
     for review in reviews:
         for quality in qualities:
+            # Populate the scores a grader has given for each question on the grading interface
+            # <email> : {<rating name> : [(rating, applicant_ID)]}
             judgments[review['grader']][quality].append(
                 (int(review[quality]), review['applicantID']))
 
@@ -371,8 +390,8 @@ def evaluateResults():
         
     for grader in judgments:
         for quality in qualities:
-            if quality == 'commitment':
-                z = [x[0] / 10 for x in judgments[grader][quality]]
+            if quality == 'r0':
+                z = [x[0] / 15 for x in judgments[grader][quality]]
             else:
                 z = stats.zscore([x[0] for x in judgments[grader][quality]])
             z_scores.append(z)
@@ -404,6 +423,7 @@ def evaluateResults():
         "gender": 1,
         "first_name": 1,
         "last_name": 1,
+        "desired_roles": 1,
     }))
 
     for applicantID in evaluations.keys():
@@ -416,11 +436,16 @@ def evaluateResults():
         eval['applicantID'] = applicantID
         eval['first_name'] = applicant['first_name']
         eval['last_name'] = applicant['last_name']
+        eval['desired_roles'] = applicant['desired_roles']
         eval.update(evaluations[applicantID])
         eval['total'] = 0
 
         for i in range(len(qualities)):
-            eval['total'] += (eval[qualities[i]] * weightings[i])
+            logging.Info("Role: ", eval['desired_roles'])
+            if eval['desired_roles'] == "Industry Developer":
+                eval['total'] += (eval[qualities[i]] * dev_weightings[i])
+            else:
+                eval['total'] += (eval[qualities[i]] * curriculum_weightings[i])
 
         eval['total'] += year_bonus[applicant['year']]
 
