@@ -262,10 +262,10 @@ def assignGraders():
     for app in apps:
         for _ in range(member_redundancy):
             member_pointer = (member_pointer + 1) % member_scope
-            app['assigned_to'].append(members[next])
+            app['assigned_to'].append(members[member_pointer])
         for _ in range(leadership_redundancy):
             leadership_pointer = (leadership_pointer + 1) % leadership_scope
-            app['assigned_to'].append(leadership[next])
+            app['assigned_to'].append(leadership[leadership_pointer])
         newApp = app.copy()
         del newApp['_id']
         applicants.replace_one({"time_created": app['time_created']}, newApp)
