@@ -260,7 +260,7 @@ def assignGraders():
 
     for app in apps:
         for i in range(redundancy):
-            logging.Info("Assigning ", graders[(current + i) % scope]['email'], "to ", app['first_name'])
+            logging.info("Assigning ", graders[(current + i) % scope]['email'], "to ", app['first_name'])
             app['assigned_to'].append(graders[(current + i) % scope]['email'])
         applicants.replace_one({"time_created": app['time_created']}, app)
         current = (current + 1) % scope
@@ -442,7 +442,7 @@ def evaluateResults():
         eval['total'] = 0
 
         for i in range(len(qualities)):
-            logging.Info("Role: ", eval['desired_roles'])
+            logging.info("Role: ", eval['desired_roles'])
             if eval['desired_roles'] == "Industry Developer":
                 eval['total'] += (eval[qualities[i]] * dev_weightings[i])
             else:
