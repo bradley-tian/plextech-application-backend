@@ -246,29 +246,28 @@ def getAnalytics():
 @application.route('/assign_graders', methods=['GET'])
 def assignGraders():
     graders = list(db.graders.find())
+    members = [m['email'] for m in graders if not m['email'] in leadership]
     apps = list(applicants.find({'assigned_to': []}))
 
-    tracker = list(db.trackers.find())[0]
-    current = int(tracker['current'])
-    scope = len(graders)
+    member_scope = len(members)
+    leadership_scope = len(leadership)
 
-    if current >= scope:
-        current = current % scope
-
-    # How many graders are we assigning to the same applicant?
-    redundancy = 4
+    # How many people are we assigning to the same applicant?
+    member_redundancy, leadership_redundancy = 2, 2
+    
+    member_pointer, leadership_pointer = 0, 0
 
     for app in apps:
-        for i in range(redundancy):
-            logging.info("Assigning ", graders[(current + i) % scope]['email'], "to ", app['first_name'])
-            app['assigned_to'].append(graders[(current + i) % scope]['email'])
-        applicants.replace_one({"time_created": app['time_created']}, app)
-        current = (current + 1) % scope
+        for i in range(member_redundancy):
+            next = (member_pointer + i) % member_scope
+            app['assigned_to'].append(members[next]['email'])
+        for j in range(leadership_redundancy):
+            next = (leadership_pointer + i) % leadership_scope
+            app['assigned_to'].append(leadership[next])
 
-    db.trackers.replace_one({'name': 'index'}, {'current': current})
+        applicants.replace_one({"time_created": app['time_created']}, app)
 
     apps = list(applicants.find())
-
     assignments = defaultdict(list)
 
     for app in apps:
@@ -278,23 +277,6 @@ def assignGraders():
             assignments[grader].append(profile)
 
     apps = list(applicants.find())
-
-    currentLead = 0
-
-    for app in apps:
-        included = False
-        for lead in leadership:
-            if lead in app['assigned_to']:
-                included = True
-        if not included:
-            app['assigned_to'].append(leadership[currentLead])
-            applicants.replace_one(
-                {"time_created": app['time_created']}, app)
-            profile = str(app['first_name']) + " " + \
-                str(app['last_name']) + ", ID: " + str(app['time_created'])
-            assignments[leadership[currentLead]].append(profile)
-            currentLead = (currentLead + 1) % len(leadership)
-
     return json.dumps(assignments)
 
 
