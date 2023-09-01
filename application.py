@@ -256,12 +256,12 @@ def assignGraders():
         current = current % scope
 
     # How many graders are we assigning to the same applicant?
-    redundancy = 3
+    redundancy = 4
 
     for app in apps:
         for i in range(redundancy):
             app['assigned_to'].append(graders[(current + i) % scope]['email'])
-        applicants.replace_one({"time_created": app['time_created']}, app)
+        applicants.update_one({"time_created": app['time_created']}, app)
         current = (current + 1) % scope
 
     db.trackers.replace_one({'name': 'index'}, {'current': current})
@@ -287,7 +287,7 @@ def assignGraders():
                 included = True
         if not included:
             app['assigned_to'].append(leadership[currentLead])
-            applicants.replace_one(
+            applicants.update_one(
                 {"time_created": app['time_created']}, app)
             profile = str(app['first_name']) + " " + \
                 str(app['last_name']) + ", ID: " + str(app['time_created'])
