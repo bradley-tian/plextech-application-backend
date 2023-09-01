@@ -264,8 +264,9 @@ def assignGraders():
         for j in range(leadership_redundancy):
             next = (leadership_pointer + i) % leadership_scope
             app['assigned_to'].append(leadership[next])
-
-        applicants.replace_one({"time_created": app['time_created']}, app)
+        newApp = app.copy()
+        del newApp['_id']
+        applicants.replace_one({"time_created": app['time_created']}, newApp)
 
     apps = list(applicants.find())
     assignments = defaultdict(list)
