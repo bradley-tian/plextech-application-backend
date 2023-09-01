@@ -148,7 +148,7 @@ def addReview():
     applicant = list(applicants.find(
         {"time_created": review['applicantID']}))[0]
     applicant['graded_by'].append(review['grader'])
-    applicants.replace_one(
+    applicants.update_one(
         {"time_created": applicant['time_created']}, applicant)
     db.reviews.insert_one(review)
     return jsonify(message='SUCCESS')
@@ -264,7 +264,7 @@ def assignGraders():
         applicants.update_one({"time_created": app['time_created']}, app)
         current = (current + 1) % scope
 
-    db.trackers.replace_one({'name': 'index'}, {'current': current})
+    db.trackers.update_one({'name': 'index'}, {'current': current})
 
     apps = list(applicants.find())
 
@@ -362,7 +362,7 @@ def flushDatabase():
     for applicant in apps:
         applicant['graded_by'] = []
         applicant['assigned_to'] = []
-        applicants.replace_one(
+        applicants.update_one(
             {"time_created": applicant['time_created']}, applicant)
     return jsonify(message='SUCCESS')
 
