@@ -255,7 +255,7 @@ def assignGraders():
     leadership_scope = len(leadership)
 
     # How many people are we assigning to the same applicant?
-    member_redundancy, leadership_redundancy = 2, 2
+    member_redundancy, leadership_redundancy = 3, 2
     
     member_pointer, leadership_pointer = 0, 0
 
