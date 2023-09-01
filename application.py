@@ -148,8 +148,10 @@ def addReview():
     applicant = list(applicants.find(
         {"time_created": review['applicantID']}))[0]
     applicant['graded_by'].append(review['grader'])
+    newApp = applicant.copy()
+    del newApp['_id']
     applicants.replace_one(
-        {"time_created": applicant['time_created']}, applicant)
+        {"time_created": applicant['time_created']}, newApp)
     db.reviews.insert_one(review)
     return jsonify(message='SUCCESS')
 
@@ -258,11 +260,11 @@ def assignGraders():
     member_pointer, leadership_pointer = 0, 0
 
     for app in apps:
-        for i in range(member_redundancy):
-            next = (member_pointer + i) % member_scope
+        for _ in range(member_redundancy):
+            member_pointer = (member_pointer + 1) % member_scope
             app['assigned_to'].append(members[next])
-        for j in range(leadership_redundancy):
-            next = (leadership_pointer + i) % leadership_scope
+        for _ in range(leadership_redundancy):
+            leadership_pointer = (leadership_pointer + 1) % leadership_scope
             app['assigned_to'].append(leadership[next])
         newApp = app.copy()
         del newApp['_id']
@@ -346,8 +348,10 @@ def flushDatabase():
     for applicant in apps:
         applicant['graded_by'] = []
         applicant['assigned_to'] = []
+        newApp = applicant.copy()
+        del newApp['_id']
         applicants.replace_one(
-            {"time_created": applicant['time_created']}, applicant)
+            {"time_created": applicant['time_created']}, newApp)
     return jsonify(message='SUCCESS')
 
 
