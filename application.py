@@ -5,6 +5,7 @@ import json
 import ssl
 import csv
 import os
+import sys
 from collections import defaultdict
 import numpy as np
 from scipy import stats
@@ -314,6 +315,7 @@ def exportResults():
 def exportApplications():
 
     applications = list(applicants.find())
+    csv.field_size_limit(sys.maxsize)
     data = []
 
     if len(applications) == 0:
