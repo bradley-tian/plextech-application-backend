@@ -374,6 +374,8 @@ def evaluateResults():
             judgments[review['grader']][quality].append(
                 (int(review[quality]), review['applicantID']))
 
+    logging.info(judgments)
+
     z_scores = []
         
     for grader in judgments:
@@ -429,11 +431,16 @@ def evaluateResults():
         eval['total'] = 0
 
         for i in range(len(qualities)):
-            logging.info("Role: ", eval['desired_roles'])
             if eval['desired_roles'] == "Industry Developer":
-                eval['total'] += (eval[qualities[i]] * dev_weightings[i])
+                dev_score = eval[qualities[i]] * dev_weightings[i]
+                if np.isnan(dev_score):
+                    dev_score = 0.02
+                eval['total'] += dev_score
             else:
-                eval['total'] += (eval[qualities[i]] * curriculum_weightings[i])
+                curriculum_score = eval[qualities[i]] * curriculum_weightings[i]
+                if np.isnan(curriculum_score):
+                    curriculum_score = 0.02
+                eval['total'] += curriculum_score
 
         eval['total'] += year_bonus[applicant['year']]
 
