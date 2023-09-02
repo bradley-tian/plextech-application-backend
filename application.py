@@ -314,8 +314,6 @@ def exportResults():
 def exportApplications():
 
     applications = list(applicants.find())
-    for app in applications:
-        app['resume'] = 'See Database'
     data = []
 
     if len(applications) == 0:
