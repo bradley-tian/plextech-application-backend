@@ -29,34 +29,25 @@ client = pymongo.MongoClient(CONNECTION_STRING)
 db = client.get_database('application_pipeline')
 user_collection = pymongo.collection.Collection(db, 'user_collection')
 
-applicants = pymongo.collection.Collection(db, 'applicants_fa2023')
+applicants = pymongo.collection.Collection(db, 'applicants_sp2024')
 graders = pymongo.collection.Collection(db, 'graders')
 reviews = pymongo.collection.Collection(db, 'reviews')
 admins = pymongo.collection.Collection(db, 'admins')
 trackers = pymongo.collection.Collection(db, 'trackers')
 errors = pymongo.collection.Collection(db, 'errors')
+prompts = pymongo.collection.Collection(db, 'prompts')
 
 # Assigning leadership guarantees to each applicant
 # Replace the email addresses below per each semester
 leadership = [
     'bradley_tian@berkeley.edu',
-    'sathvika@berkeley.edu',
     'shamith09@berkeley.edu',
-    'tiajain@berkeley.edu',
-    'howardm12138@berkeley.edu',
-    'samarth.ghai@berkeley.edu',
-    'aakashpathak@berkeley.edu',
-    'epchao@berkeley.edu',
-    'ragastya@berkeley.edu',
-    'taiga2002@berkeley.edu',
-    'jessica.young@berkeley.edu',
-    'malam2003@berkeley.edu',
-    'thomaswang@berkeley.edu',
-    'somup27@berkeley.edu',
-    'tylerauton-smith@berkeley.edu',
-    'vishal.bansal@berkeley.edu',
-    'v_perisic@berkeley.edu',
-    'preethi.m@berkeley.edu',
+    'danielsamony@berkeley.edu',
+    'joon.yoo181@berkeley.edu',
+    'terriannezhang@berkeley.edu',
+    'eldenyap@berkeley.edu',
+    'nkhanchu@berkeley.edu',
+    'rakhichd@berkeley.edu',
 ]
 
 # Change this every semester
@@ -493,6 +484,26 @@ def checkProgress():
     incomplete = list(incomplete)
     return json.dumps(incomplete)
 
+@application.route('/load_prompts', methods=['GET'])
+def loadPrompts():
+    prompt = list(prompts.find({}))
+    if not prompt:
+        return json.dumps({})
+    result = {}
+    for key, value in prompt[0].items():
+        if key == "_id":
+            result['id'] = str(value)
+        else:
+            result[key] = value
+    return json.dumps(result)
+
+@application.route('/change_prompts', methods=['POST'])
+def changePrompts():
+    change = json.loads(request.get_data(as_text=True))
+    db.prompts.delete_many({})
+    db.prompts.insert_one(change)
+    print(list(db.prompts.find({})))
+    return jsonify(message='SUCCESS')
 
 if __name__ == '__main__':
     application.run(debug=True)
