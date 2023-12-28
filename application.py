@@ -365,8 +365,6 @@ def evaluateResults():
             judgments[review['grader']][quality].append(
                 (int(review[quality]), review['applicantID']))
 
-    logging.info(judgments)
-
     z_scores = []
         
     for grader in judgments:
