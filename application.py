@@ -48,7 +48,18 @@ leadership = [
     'eldenyap@berkeley.edu',
     'nkhanchu@berkeley.edu',
     'rakhichd@berkeley.edu',
+    'taiga2002@berkeley.edu',
+    'epchao@berkeley.edu',
+    'malam2003@berkeley.edu',
+    'tylerauton-smith@berkeley.edu',
+    'jchuang77@berkeley.edu',
+    'dylanhopkins@berkeley.edu',
+    'satwik@berkeley.edu',
+    'joying@berkeley.edu',
 ]
+
+# How many people are we assigning to the same applicant?
+member_redundancy, leadership_redundancy = 3, 2
 
 # Change this every semester
 yearTranslations = {
