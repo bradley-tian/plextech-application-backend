@@ -96,15 +96,15 @@ qualities = [
 # Edit weightings here
 # Ensure that the weighting order corresponds element-wise to the ordering of qualities
 curriculum_weightings = [
-    0.025,
-    0.025,
-    0.1,
+    0.2,
+    0.175,
     0.15,
+    0.2,
+    0.05,
+    0.05,
+    0.025,
     0.1,
-    0.1,
-    0.15,
-    0.1,
-    0.1,
+    0.0,
     0.05,
 ]
 
