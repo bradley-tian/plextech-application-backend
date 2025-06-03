@@ -3,6 +3,8 @@
 Welcome to the backend application of the PlexTech applicant portal. 
 This readme only provides a high-level overview of the entire project; for more details, refer to comments within the main Python file. 
 
+For the frontend repository, please visit [this link](https://github.com/bradley-tian/plextech-application-frontend).
+
 ## Data Storage and Persistence
 
 The backend API server is connected with a MongoDB cluster to support the storage and processing of applicant data. A NoSQL fashion is chosen for the flexibility in storing dynamic forms of data - text-based, file-base, image-based, etc. 
